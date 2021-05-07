@@ -1,0 +1,9 @@
+['setuptools', 'cffi']
+
+pyinstaller --onefile --paths=c:\\users\\c.ferrao\\anaconda3\\lib\\site-packages design_quality_tool.py
+
+C:\Users\d.nunziati\Desktop
+
+Brandtore_Scrapper.exe
+
+

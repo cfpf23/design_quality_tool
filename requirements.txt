@@ -1,0 +1,12 @@
+pandas
+datetime
+pillow
+psd_tools
+ttkthemes
+parsel
+xlsxwriter
+xlrd
+openpyxl
+shutil
+os
+
