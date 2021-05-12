@@ -3,6 +3,7 @@ import pandas as pd
 from PIL import Image
 from psd_tools import PSDImage
 from datetime import datetime
+from time import sleep
 import xlsxwriter
 from openpyxl import load_workbook
 import shutil, os
@@ -33,17 +34,10 @@ def save_data(df, path, templates):
     for k, v in templates.items():
         print(k, v)
         worksheet = workbook.add_worksheet(k)
-        # template_image = open_image(v)
-        #
-        # image_width, image_height = template_image.size
-        #
-        # x_scale = ((945*image_width)/image_height) / image_width
-        # y_scale = 945 / image_height
-        #
-        # worksheet.insert_image('B2', v,
-        #                        {'x_scale': x_scale, 'y_scale': y_scale})
         worksheet.insert_image('B2', v)
+    sleep(3)
     workbook.close()
+    print("ok")
     writer = pd.ExcelWriter(path_to_file, engine='openpyxl',mode='a')
     df.to_excel(writer, sheet_name=sheet_name, index=False)
     print(f'Processing data for {key} in function append_data')
@@ -186,12 +180,13 @@ def general_file_mapper(path):
 
 def byte_organizer(number: int) -> str:
     try:
-        if len(str(number)) <= 6:
-            return f"{str(round(number/1000, 3))} KB"
-        elif (len(str(number)) > 6) & (len(str(number)) <= 9):
-            return f"{str(round(number/1000000, 3))} MB"
-        elif (len(str(number)) > 9) & (len(str(number)) <= 12):
-            return f"{str(round(number/1000000000, 3))} GB"
+        return f"{str(round(number / 1000000, 3))}"
+        # if len(str(number)) <= 6:
+        #     return f"{str(round(number/1000, 3))} KB"
+        # elif (len(str(number)) > 6) & (len(str(number)) <= 9):
+        #     return f"{str(round(number/1000000, 3))} MB"
+        # elif (len(str(number)) > 9) & (len(str(number)) <= 12):
+        #     return f"{str(round(number/1000000000, 3))} GB"
     except Exception as e:
         print(e)
         return str(e)
@@ -250,7 +245,7 @@ def categorization(string):
 
 def dataframe_generation(path):
     df = pd.DataFrame(general_file_mapper(path))
-    df[['width', 'height', 'memory_usage_bytes']] = df['file_address'].apply(get_image_size).str.split(',', expand=True)
+    df[['width_(px)', 'height_(px)', 'memory_usage_(MB)']] = df['file_address'].apply(get_image_size).str.split(',', expand=True)
     df['categorization'] = df['file_origin'].apply(categorization)
     df.categorization.fillna('other', inplace=True)
     return df
