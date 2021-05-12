@@ -9,7 +9,7 @@ from src.image_analyzer import file_reader
 class SimpleWindow():
 
 
-    def __init__(self):
+    def __init__(self, options):
 
         self.root = tk.Tk()
         self.root.title("Design Quality Tool")
@@ -17,16 +17,17 @@ class SimpleWindow():
         self.title = tk.Label(master=self.root, text="Design Quality Tool")
         self.title.config(font=("Amazon Ember", 25))
         self.title.grid(row=1, columnspan=3)
+        self.templates_root = options['DIR_PATH'] + 'assets'
 
         # variables
 
-        self.file_origin_label_2 = tk.Label(master=self.root, text=f"Choose your file from previous report: ")
-        self.file_origin_label_2.config(font=("Amazon Ember", 9))
-        self.file_origin_label_2.grid(row=3, column=0, sticky=W)
-        self.file_origin_2 = tk.Entry(master=self.root, width=50)
-        self.file_origin_2.grid(row=3, column=1)
-        self.file_origin_getter_2 = tk.Button(master=self.root, text="Choose file", command=self.get_path_report)
-        self.file_origin_getter_2.grid(row=3, column=2, sticky='nesw')
+        # self.file_origin_label_2 = tk.Label(master=self.root, text=f"Choose your file from previous report: ")
+        # self.file_origin_label_2.config(font=("Amazon Ember", 9))
+        # self.file_origin_label_2.grid(row=3, column=0, sticky=W)
+        # self.file_origin_2 = tk.Entry(master=self.root, width=50)
+        # self.file_origin_2.grid(row=3, column=1)
+        # self.file_origin_getter_2 = tk.Button(master=self.root, text="Choose file", command=self.get_path_report)
+        # self.file_origin_getter_2.grid(row=3, column=2, sticky='nesw')
 
         self.dir_origin_label_1 = tk.Label(master=self.root, text=f"Choose your folder from project: ")
         self.dir_origin_label_1.config(font=("Amazon Ember", 9))
@@ -73,25 +74,44 @@ class SimpleWindow():
         self.dir_destination.delete(0, 'end')
         return self.dir_destination.insert(0,destination)
 
-
     def analyze_files(self):
-        old_report_path = self.file_origin_2.get()
-        if old_report_path == '':
-            pass
-        else:
-            df = file_reader(old_report_path)
         path_to_images = self.dir_origin_1.get()
         if path_to_images == '':
             return tk.messagebox.showinfo(title='Warning', message='Please insert a folder')
         destination_to_report = self.dir_destination.get()
-        if destination_to_report == '' and old_report_path !='':
-            destination_to_report = '\\'.join(old_report_path.split('\\')[:-1])
-        elif destination_to_report == '' and old_report_path =='':
+        if destination_to_report == '':
             return tk.messagebox.showinfo(title='Warning', message='Please insert a destination')
 
-        start_audit(path_to_images, destination_to_report, old_report_path)
+        old_report_path = True
+        templates_root = self.templates_root
+
+        start_audit(path_to_images, destination_to_report, templates_root, old_report_path)
 
         return tk.messagebox.showinfo(title='Warning', message='Check your folder!')
+
+
+
+    # def analyze_files(self):
+    #     """
+    #     retired function - do not delete
+    #     """
+    #     old_report_path = self.file_origin_2.get()
+    #     if old_report_path == '':
+    #         pass
+    #     else:
+    #         df = file_reader(old_report_path)
+    #     path_to_images = self.dir_origin_1.get()
+    #     if path_to_images == '':
+    #         return tk.messagebox.showinfo(title='Warning', message='Please insert a folder')
+    #     destination_to_report = self.dir_destination.get()
+    #     if destination_to_report == '' and old_report_path !='':
+    #         destination_to_report = '\\'.join(old_report_path.split('\\')[:-1])
+    #     elif destination_to_report == '' and old_report_path =='':
+    #         return tk.messagebox.showinfo(title='Warning', message='Please insert a destination')
+    #
+    #     start_audit(path_to_images, destination_to_report, old_report_path)
+    #
+    #     return tk.messagebox.showinfo(title='Warning', message='Check your folder!')
 
 # if __name__ == "__main__":
 #     SimpleWindow().root.mainloop()

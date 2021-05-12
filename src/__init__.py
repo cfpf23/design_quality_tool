@@ -1,9 +1,9 @@
 import src.app_gui as app_gui
 
 
-def run():
+def run(options):
     try:
-        app_gui.open_tool_window()
+        app_gui.open_tool_window(options)
     except Exception as error:
         raise error
 

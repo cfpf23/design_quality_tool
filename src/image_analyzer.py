@@ -8,7 +8,54 @@ from openpyxl import load_workbook
 import shutil, os
 
 
+def now():
+    """
+    :return: str now
+    """
+    return datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+
+
+def open_image(file: str) -> Image.Image:
+    im = Image.open(file)
+    return im
+
+
+
+def save_data(df, path, templates):
+    key = 'design_tool'
+    date = datetime.today().strftime('%Y-%m-%d')
+    df['date'] = date
+    sheet_name = f'sheet_{key}'
+    path_to_file = f"{path}/output_design_tool_{now()}.xlsx".replace("\\", "/")
+    path_to_file = path_to_file.replace("-", "_")
+    workbook = xlsxwriter.Workbook(path_to_file)
+    # worksheet = workbook.add_worksheet(f'sheet_images_{date}')
+    for k, v in templates.items():
+        print(k, v)
+        worksheet = workbook.add_worksheet(k)
+        # template_image = open_image(v)
+        #
+        # image_width, image_height = template_image.size
+        #
+        # x_scale = ((945*image_width)/image_height) / image_width
+        # y_scale = 945 / image_height
+        #
+        # worksheet.insert_image('B2', v,
+        #                        {'x_scale': x_scale, 'y_scale': y_scale})
+        worksheet.insert_image('B2', v)
+    workbook.close()
+    writer = pd.ExcelWriter(path_to_file, engine='openpyxl',mode='a')
+    df.to_excel(writer, sheet_name=sheet_name, index=False)
+    print(f'Processing data for {key} in function append_data')
+    writer.save()
+
+    return print(f'\nCorrectly appended data to {path} - {key}_report')
+
+
 def check_presence_sheet(path_file, sheet_name):
+    """
+    retired function - do not erase
+    """
     wb = load_workbook(path_file, read_only=True)
     if sheet_name in wb.sheetnames:
         return True
@@ -16,7 +63,26 @@ def check_presence_sheet(path_file, sheet_name):
         return False
 
 
+def add_templates_sheets(path, templates):
+    """
+    retired function - do not erase
+    """
+    workbook = load_workbook(path)
+    for k, v in templates.items():
+        sheet_name = f"template_{k}"
+        if not check_presence_sheet(path, sheet_name):
+            print(sheet_name)
+            workbook.create_sheet(sheet_name)
+            print(workbook.sheetnames)
+            workbook.save(path)
+            workbook.close()
+    return
+
+
 def append_data_new(df_from_folder, path_old_file, sheet_name,destination_to_report):
+    """
+    retired function - do not erase
+    """
     wb = load_workbook(path_old_file, read_only=True)
     writer = pd.ExcelWriter(path_old_file, engine='xlsxwriter', options={'strings_to_urls': False})
     for sheet in wb.sheetnames:
@@ -27,6 +93,7 @@ def append_data_new(df_from_folder, path_old_file, sheet_name,destination_to_rep
         else:
             file.to_excel(writer, sheet_name=sheet, index=False, encoding='utf-8')
     writer.save()
+    # add_templates_sheets(path_old_file, templates)
     if destination_to_report:
         if '/'.join(path_old_file.split('/')[:-1]) != destination_to_report.replace('\\', '/'):
             shutil.move(path_old_file, destination_to_report)
@@ -35,32 +102,38 @@ def append_data_new(df_from_folder, path_old_file, sheet_name,destination_to_rep
         return
 
 
-def append_right_sheet(df_from_folder, path_old_file, sheet_name, destination_to_report):
-    print(1)
-    print(sheet_name)
-    writer = pd.ExcelWriter(path_old_file, engine='xlsxwriter', options={'strings_to_urls': False})
-
-    file = pd.read_excel(path_old_file, sheet_name=sheet_name)
-    file = file.append(df_from_folder, ignore_index=True)
-    file.to_excel(writer, sheet_name=sheet_name, index=False, encoding='utf-8')
-    writer.save()
-    if destination_to_report:
-        # destination = f'{destination_to_report}'
-        if '/'.join(path_old_file.split('/')[:-1]) != destination_to_report.replace('\\', '/'):
-            shutil.move(path_old_file, destination_to_report)
-            return
-    else:
-        return
+# def append_right_sheet(df_from_folder, path_old_file, sheet_name, destination_to_report):
+#     print(1)
+#     print(sheet_name)
+#     writer = pd.ExcelWriter(path_old_file, engine='xlsxwriter', options={'strings_to_urls': False})
+#
+#     file = pd.read_excel(path_old_file, sheet_name=sheet_name)
+#     file = file.append(df_from_folder, ignore_index=True)
+#     file.to_excel(writer, sheet_name=sheet_name, index=False, encoding='utf-8')
+#     writer.save()
+#     # add_templates(path_old_file)
+#     if destination_to_report:
+#         # destination = f'{destination_to_report}'
+#         if '/'.join(path_old_file.split('/')[:-1]) != destination_to_report.replace('\\', '/'):
+#             shutil.move(path_old_file, destination_to_report)
+#             return
+#     else:
+#         return
 
 
 def create_append_sheet(df_from_folder, path_old_file, sheet_name, destination_to_report):
+    """
+    retired function - do not erase
+    """
     print(2)
     print(sheet_name)
     writer_old = pd.ExcelWriter(path_old_file, engine='openpyxl',mode='a')
     df_from_folder.to_excel(writer_old, sheet_name=sheet_name, index=False, encoding='utf-8')
-    writer_old.save()
+    # writer_old.save()
     writer_old.close()
+    # add_templates(path_old_file)
     # date = datetime.today().strftime('%Y-%m-%d')
+    # add_templates_sheets(path_old_file, templates)
     if destination_to_report:
         # destination = f'{destination_to_report}'
         if '/'.join(path_old_file.split('/')[:-1]) != destination_to_report.replace('\\', '/'):
@@ -71,6 +144,7 @@ def create_append_sheet(df_from_folder, path_old_file, sheet_name, destination_t
 
 
 def save_manager(df_from_folder, path_old_file, sheet_name, destination_to_report):
+
     if check_presence_sheet(path_old_file, sheet_name):
         append_data_new(df_from_folder, path_old_file, sheet_name, destination_to_report)
     else:
@@ -110,8 +184,34 @@ def general_file_mapper(path):
     return result
 
 
+def byte_organizer(number: int) -> str:
+    try:
+        if len(str(number)) <= 6:
+            return f"{str(round(number/1000, 3))} KB"
+        elif (len(str(number)) > 6) & (len(str(number)) <= 9):
+            return f"{str(round(number/1000000, 3))} MB"
+        elif (len(str(number)) > 9) & (len(str(number)) <= 12):
+            return f"{str(round(number/1000000000, 3))} GB"
+    except Exception as e:
+        print(e)
+        return str(e)
+
+
+def file_size_getter(file: str):
+    try:
+        file = file.replace("\\", "/")
+        if os.path.getsize(file) > 150000:
+            size = os.path.getsize(file) - os.path.getsize('/'.join(file.split('/')[:-1]))
+            return size
+        else:
+            return os.path.getsize(file)
+    except Exception as e:
+        return str(e)
+
+
 def get_image_size(row_file):
-    memory_usage = os.path.getsize(row_file)
+    memory_usage = file_size_getter(row_file)
+    memory_usage = byte_organizer(memory_usage)
     width = '-'
     height = '-'
     try:
@@ -157,6 +257,9 @@ def dataframe_generation(path):
 
 
 def save_file(df, path):
+    """
+    retired function - do not erase
+    """
 
     date = datetime.today().strftime('%Y-%m-%d')
     destination = f'{path}/report_images_{date}.xlsx'
@@ -164,9 +267,13 @@ def save_file(df, path):
     if os.path.exists(destination):
         writer = pd.ExcelWriter(f"{destination}", engine='xlsxwriter', options={'strings_to_urls': False})
     else:
-        workbook = xlsxwriter.Workbook(destination)
-        worksheet = workbook.add_worksheet(f'sheet_images_{date}')
-        workbook.close()
+        # workbook = xlsxwriter.Workbook(destination)
+        # worksheet = workbook.add_worksheet(f'sheet_images_{date}')
+        # for k, v in templates.items():
+        #     print(k, v)
+        #     worksheet = workbook.add_worksheet(k)
+        #     worksheet.insert_image('B2', v)
+        # workbook.close()
         writer = pd.ExcelWriter(f"{destination}", engine='xlsxwriter', options={'strings_to_urls': False})
     print(f'Processing data for images in function append_data')
     file = pd.read_excel(destination, sheet_name=f'sheet_images_{date}')
